@@ -5,6 +5,12 @@ import random
 from argparse import ArgumentParser, Namespace
 from typing import List, Literal, Tuple, Union
 
+# TODO: Implement in Scala 2.13
+# TODO: Add Pydantic support
+# TODO: Add logging
+# TODO: Add output mode flag
+# TODO: Remove `Project 1/` folder
+# TODO: Rename the project
 
 ANALYTICAL_SOLUTION = 2 / 3
 
@@ -82,7 +88,7 @@ def classify_points(point_a: Tuple[float, float],
     """
     Returns:
         1 if a convex hull of A, B, C and D is a quadrilateral,
-        -1 if a triangle,
+       -1 if a triangle,
         0 if any three of A, B, C and D are collinear (or if not all points are distinct).
     """
     return (
