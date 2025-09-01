@@ -1,5 +1,11 @@
-# Advanced Network Analysis Techniques
-## May 2020, HSE MASNA
+# monte-carlo-simulation
 
-* Course page: http://vladowiki.fmf.uni-lj.si/doku.php?id=ru:hse:snet
-* Projects page: http://vladowiki.fmf.uni-lj.si/doku.php?id=ru:hse:snet19:stu
+This is a test project based on one of my master classes assignments.
+
+## TODO
+* Implement in Scala 2.13
+* Add Pydantic support
+* Add logging
+* Add output mode flag
+* Remove `Project 1/` folder
+* Rename the project
