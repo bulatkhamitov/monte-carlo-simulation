@@ -1,5 +1,9 @@
 # Changelog
 
+## [2025-09-04]
+
+Minor fixes
+
 ## [2025-09-01]
 
 ### Refactoring
