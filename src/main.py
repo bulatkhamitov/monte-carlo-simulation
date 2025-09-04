@@ -10,7 +10,6 @@ from typing import List, Literal, Tuple, Union
 # TODO: Add logging
 # TODO: Add output mode flag
 # TODO: Remove `Project 1/` folder
-# TODO: Rename the project
 
 ANALYTICAL_SOLUTION = 2 / 3
 
@@ -124,7 +123,7 @@ def simulate(args: Namespace) -> List[float]:
     quad_cnt: int = 0
     total_cnt: int = 0
 
-    for _ in range(1, args.num + 1):
+    while total_cnt < args.num:
         quad_points = random.sample(points, k=4)
 
         point_a: tuple[float, float] = quad_points[0]
@@ -143,13 +142,13 @@ def simulate(args: Namespace) -> List[float]:
 
 
 def plot_results(args: Namespace, res: List[float]) -> None:
-    XX = np.linspace(1, args.num, args.num)
-    YY = res
+    xx = np.linspace(1, args.num + 1, args.num)
+    yy = res
 
     plt.figure(figsize=(8, 4))
-    plt.scatter(XX, YY, s=0.3, color="blue", label="Monte-Carlo simulation")
+    plt.scatter(xx, yy, s=0.3, color="blue", label="Monte-Carlo simulation")
     plt.hlines(ANALYTICAL_SOLUTION, 100, args.num, colors="red", label="Analytical solution")
-    plt.ylim(0.6, 0.8)
+    plt.ylim(0.6, 0.7)
     plt.xlabel("$N$")
     plt.ylabel("$P$")
     plt.legend()
@@ -164,6 +163,6 @@ def main(args: Namespace) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--num", "-n", default=10_000, type=int)
-    args = parser.parse_args()
+    cli_args = parser.parse_args()
 
-    main(args)
+    main(cli_args)
