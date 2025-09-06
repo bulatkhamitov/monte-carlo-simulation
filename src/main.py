@@ -3,20 +3,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from argparse import ArgumentParser, Namespace
-from typing import List, Literal, Tuple, Union
+from pydantic import BaseModel, Field
+from typing import List, Literal
 
-# TODO: Implement in Scala 2.13
-# TODO: Add Pydantic support
 # TODO: Add logging
 # TODO: Add output mode flag
 # TODO: Remove `Project 1/` folder
+# TODO: Add TOML integration
+# TODO: Implement triangle plotting function
+# TODO: Implement random seed option
 
 ANALYTICAL_SOLUTION = 2 / 3
 
+class Point2D(BaseModel):
+    x: float = Field(..., description="x coordinate")
+    y: float = Field(..., description="y coordinate")
 
-def sample_triangle_points(point_a: Tuple[float, float],
-                           point_b: Tuple[float, float],
-                           point_c: Tuple[float, float]) -> Tuple[float, float]:
+
+def sample_triangle_points(point_a: Point2D, point_b: Point2D, point_c: Point2D) -> Point2D:
     """
     Sample a single random point uniformly within the triangle
     defined by vertices `point_a`, `point_b`, and `point_c`.
@@ -29,25 +33,25 @@ def sample_triangle_points(point_a: Tuple[float, float],
         point_c: The third vertex of the triangle (x, y).
 
     Returns:
-        A tuple `(x, y)` representing a point uniformly sampled inside the triangle.
+        Point2D: a point uniformly sampled inside the triangle.
     """
     r1: float = random.random()
     r2: float = random.random()
 
     s1: float = math.sqrt(r1)
 
-    x: float = point_a[0] * (1.0 - s1) + point_b[0] * (1.0 - r2) * s1 + point_c[0] * r2 * s1
-    y: float = point_a[1] * (1.0 - s1) + point_b[1] * (1.0 - r2) * s1 + point_c[1] * r2 * s1
+    x: float = point_a.x * (1.0 - s1) + point_b.x * (1.0 - r2) * s1 + point_c.x * r2 * s1
+    y: float = point_a.y * (1.0 - s1) + point_b.y * (1.0 - r2) * s1 + point_c.y * r2 * s1
 
-    return x, y
+    return Point2D(x=x, y=y)
 
 
-def sign(num: float | int) -> Literal[-1, 0, 1]:
+def sign(num: float) -> Literal[-1, 0, 1]:
     """
     Return the sign of a finite number.
 
     Args:
-        num (Union[float, int]): The number to sign.
+        num (float): The number to sign.
 
     Returns:
         The sign of the number.
@@ -60,30 +64,27 @@ def sign(num: float | int) -> Literal[-1, 0, 1]:
         return 0
 
 
-def ccw(point_a: Tuple[float, float], point_b: Tuple[float, float], point_c: Tuple[float, float]) -> int:
+def orientation(point_a: Point2D, point_b: Point2D, point_c: Point2D) -> Literal[-1, 0, 1]:
     """
     Args:
-        point_a (Tuple[float, float]): The first point.
-        point_b (Tuple[float, float]): The second point.
-        point_c (Tuple[float, float]): The third point.
+        point_a (Point2D): The first point.
+        point_b (Point2D): The second point.
+        point_c (Point2D): The third point.
 
     Returns:
         1 if A-B-C is a counterclockwise turn,
-        -1 for clockwise,
+       -1 for clockwise,
         0 if the points are collinear (or not all distinct).
     """
-    disc: Union[float, int] = (
-        (point_a[0] - point_c[0]) *
-        (point_b[1] - point_c[1]) - (point_a[1] - point_c[1]) *
-        (point_b[0] - point_c[0])
+    disc: float = (
+        (point_a.x - point_c.x) *
+        (point_b.y - point_c.y) - (point_a.y - point_c.y) *
+        (point_b.x - point_c.x)
     )
     return sign(disc)
 
 
-def classify_points(point_a: Tuple[float, float],
-                    point_b: Tuple[float, float],
-                    point_c: Tuple[float, float],
-                    point_d: Tuple[float, float]) -> int:
+def classify_points(point_a: Point2D, point_b: Point2D, point_c: Point2D, point_d: Point2D) -> int:
     """
     Returns:
         1 if a convex hull of A, B, C and D is a quadrilateral,
@@ -91,10 +92,10 @@ def classify_points(point_a: Tuple[float, float],
         0 if any three of A, B, C and D are collinear (or if not all points are distinct).
     """
     return (
-        ccw(point_a, point_b, point_c) *
-        ccw(point_a, point_b, point_d) *
-        ccw(point_a, point_c, point_d) *
-        ccw(point_b, point_c, point_d)
+        orientation(point_a, point_b, point_c) *
+        orientation(point_a, point_b, point_d) *
+        orientation(point_a, point_c, point_d) *
+        orientation(point_b, point_c, point_d)
     )
 
 
@@ -110,15 +111,13 @@ def simulate(args: Namespace) -> List[float]:
     """
 
     # Define the points of the triangle
-    point_a: tuple[float, float] = (0, 0)
-    point_b: tuple[float, float] = (0.5, math.sqrt(.75))
-    point_c: tuple[float, float] = (1, 0)
+    point_a = Point2D(x=0.0, y=0.0)
+    point_b = Point2D(x=0.5, y=math.sqrt(0.75))
+    point_c = Point2D(x=1.0, y=0.0)
 
     # Generate N points within the triangle
     results: List[float] = []
-    points: List[Tuple[float, float]] = [
-        sample_triangle_points(point_a, point_b, point_c) for _ in range(args.num)
-    ]
+    points: List[Point2D] = [sample_triangle_points(point_a, point_b, point_c) for _ in range(args.num)]
 
     quad_cnt: int = 0
     total_cnt: int = 0
@@ -126,29 +125,41 @@ def simulate(args: Namespace) -> List[float]:
     while total_cnt < args.num:
         quad_points = random.sample(points, k=4)
 
-        point_a: tuple[float, float] = quad_points[0]
-        point_b: tuple[float, float] = quad_points[1]
-        point_c: tuple[float, float] = quad_points[2]
-        point_d: tuple[float, float] = quad_points[3]
+        point_a: Point2D = quad_points[0]
+        point_b: Point2D = quad_points[1]
+        point_c: Point2D = quad_points[2]
+        point_d: Point2D = quad_points[3]
 
         total_cnt += 1
 
         if classify_points(point_a, point_b, point_c, point_d) == 1:
             quad_cnt += 1
 
-        results.append(quad_cnt / total_cnt)
+        probability: float = quad_cnt / total_cnt
+        results.append(probability)
 
     return results
 
 
 def plot_results(args: Namespace, res: List[float]) -> None:
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": "serif",
+        "axes.labelsize": 10,
+        "font.size": 10,
+        "legend.fontsize": 8,
+        "xtick.labelsize": 8,
+        "ytick.labelsize": 8,
+        "figure.dpi": 100,
+    })
+
     xx = np.linspace(1, args.num + 1, args.num)
     yy = res
 
     plt.figure(figsize=(8, 4))
     plt.scatter(xx, yy, s=0.3, color="blue", label="Monte-Carlo simulation")
-    plt.hlines(ANALYTICAL_SOLUTION, 100, args.num, colors="red", label="Analytical solution")
-    plt.ylim(0.6, 0.7)
+    plt.hlines(y=ANALYTICAL_SOLUTION, xmin=0, xmax=args.num, colors="red", label="Analytical solution")
+    # plt.ylim(0.6, 0.7)
     plt.xlabel("$N$")
     plt.ylabel("$P$")
     plt.legend()
@@ -163,6 +174,9 @@ def main(args: Namespace) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--num", "-n", default=10_000, type=int)
+    # parser.add_argument("--output", "-o", default="./out/output.png")
+    parser.add_argument("--verbose", "-v", action="store_true", required=False)
+    parser.add_argument("--seed", "-s", action="store_true", required=False)
     cli_args = parser.parse_args()
 
     main(cli_args)

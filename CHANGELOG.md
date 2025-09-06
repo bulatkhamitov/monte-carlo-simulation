@@ -1,5 +1,14 @@
 # Changelog
 
+## [2025-09-05]
+
+### Refactoring
+
+- Add Pydantic support
+- Extend CLI args options
+- Miscellaneous fixes
+- Add TeX style formatting
+
 ## [2025-09-04]
 
 Minor fixes
