@@ -22,18 +22,19 @@ class Point2D(BaseModel):
 
 def sample_triangle_points(point_a: Point2D, point_b: Point2D, point_c: Point2D) -> Point2D:
     """
-    Sample a single random point uniformly within the triangle
+    Samples a single random point uniformly within the triangle
     defined by vertices `point_a`, `point_b`, and `point_c`.
 
-    This uses the method of barycentric coordinates for uniform sampling.
+    Uses barycentric coordinates with square-root transformation for uniform
+    distribution over the triangle's area.
 
     Args:
-        point_a: The first vertex of the triangle (x, y).
-        point_b: The second vertex of the triangle (x, y).
-        point_c: The third vertex of the triangle (x, y).
+        point_a (Point2D): First vertex of the triangle.
+        point_b (Point2D): Second vertex of the triangle.
+        point_c (Point2D): Third vertex of the triangle.
 
     Returns:
-        Point2D: a point uniformly sampled inside the triangle.
+        Point2D: A uniformly sampled point inside the triangle.
     """
     r1: float = random.random()
     r2: float = random.random()
@@ -48,13 +49,16 @@ def sample_triangle_points(point_a: Point2D, point_b: Point2D, point_c: Point2D)
 
 def sign(num: float) -> Literal[-1, 0, 1]:
     """
-    Return the sign of a finite number.
+    Returns the sign of a real number.
 
     Args:
-        num (float): The number to sign.
+        num (float): A finite numeric value.
 
     Returns:
-        The sign of the number.
+        Literal[-1, 0, 1]:
+            1 if the number is positive,
+           -1 if negative,
+            0 if zero.
     """
     if num > 0:
         return 1
@@ -66,15 +70,21 @@ def sign(num: float) -> Literal[-1, 0, 1]:
 
 def orientation(point_a: Point2D, point_b: Point2D, point_c: Point2D) -> Literal[-1, 0, 1]:
     """
+    Determines the orientation of the triplet (point_a, point_b, point_c).
+
+    Uses the sign of the determinant of the triangle formed by the points to
+    classify their orientation.
+
     Args:
         point_a (Point2D): The first point.
         point_b (Point2D): The second point.
         point_c (Point2D): The third point.
 
     Returns:
-        1 if A-B-C is a counterclockwise turn,
-       -1 for clockwise,
-        0 if the points are collinear (or not all distinct).
+        Literal[-1, 0, 1]:
+            1 if the sequence forms a counterclockwise turn,
+           -1 if clockwise,
+            0 if the points are collinear.
     """
     disc: float = (
         (point_a.x - point_c.x) *
@@ -86,10 +96,19 @@ def orientation(point_a: Point2D, point_b: Point2D, point_c: Point2D) -> Literal
 
 def classify_points(point_a: Point2D, point_b: Point2D, point_c: Point2D, point_d: Point2D) -> int:
     """
+    Classifies the shape formed by the convex hull of four 2D points.
+
+    Args:
+        point_a (Point2D): First point.
+        point_b (Point2D): Second point.
+        point_c (Point2D): Third point.
+        point_d (Point2D): Fourth point.
+
     Returns:
-        1 if a convex hull of A, B, C and D is a quadrilateral,
-       -1 if a triangle,
-        0 if any three of A, B, C and D are collinear (or if not all points are distinct).
+        int:
+            1 if the convex hull forms a quadrilateral,
+           -1 if it forms a triangle,
+            0 if any three points are collinear or not all points are distinct.
     """
     return (
         orientation(point_a, point_b, point_c) *
@@ -142,6 +161,13 @@ def simulate(args: Namespace) -> List[float]:
 
 
 def plot_results(args: Namespace, res: List[float]) -> None:
+    """
+    Plots the Monte Carlo simulation results against the analytical solution.
+
+    Args:
+        args (Namespace): Parsed command-line arguments containing `num`.
+        res (List[float]): A list of running probability estimates per iteration.
+    """
     plt.rcParams.update({
         "text.usetex": True,
         "font.family": "serif",
